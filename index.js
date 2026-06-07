@@ -68,6 +68,12 @@ todayDateButton.addEventListener('click', function (){
     renderCalender()
 })
 
+clearDateButton.addEventListener('click', function (){
+    selectedDate= null
+    dateInput.value = ''
+    renderCalender()
+})
+
 // helper func
 function getCalendarDays(year, month) {
   const dayOfTheWeek = new Date(year, month, 1).getDay();
@@ -115,6 +121,7 @@ function renderCalender() {
     if (isSelectedDay(day)) {
       dayCell.classList.add("selected");
     }
+    //   here we are attching even listener to all the cells, this does not seem correct, use event delegation
     dayCell.addEventListener("click", function () {
       if (!day) return;
       selectedDate = new Date(currentYear, currentMonth, day);
@@ -127,7 +134,7 @@ function renderCalender() {
 }
 
 function goToNextMonth(state) {
-  if (state.month === 11) {
+  if (state.month >11) {
     return {
       month: 0,
       year: state.year + 1,
@@ -141,7 +148,7 @@ function goToNextMonth(state) {
 }
 
 function goToPrevMonth(state) {
-  if (state.month === 0) {
+  if (state.month <0) {
     return {
       month: 11,
       year: state.year - 1,
