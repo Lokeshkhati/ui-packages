@@ -59,69 +59,71 @@ prevYearButton.addEventListener("click", function () {
   renderCalender();
 });
 
-todayDateButton.addEventListener('click', function (){
-    const date = new Date()
-    selectedDate= date
-    currentMonth =date.getMonth()
-    currentYear = date.getFullYear()
-    dateInput.value = selectedDate.toLocaleDateString()
-    renderCalender()
-})
+todayDateButton.addEventListener("click", function () {
+  const date = new Date();
+  selectedDate = date;
+  currentMonth = date.getMonth();
+  currentYear = date.getFullYear();
+  dateInput.value = selectedDate.toLocaleDateString();
+  renderCalender();
+});
 
-clearDateButton.addEventListener('click', function (){
-    selectedDate= null
-    dateInput.value = ''
-    renderCalender()
-})
+clearDateButton.addEventListener("click", function () {
+  selectedDate = null;
+  dateInput.value = "";
+  renderCalender();
+});
 
 // helper func
 function getCalendarDays(year, month) {
   const dayOfTheWeek = new Date(year, month, 1).getDay();
-  const dayOfThemOnth = new Date(year, month + 1, 0).getDate();
-
-  const leadingDays = Array(dayOfTheWeek).fill(null);
   // O+1 means Feb , but date 0 means one day before Feb which is jan 31st
-  const monthDays = Array.from(
-    { length: dayOfThemOnth },
-    (_, index) => index + 1
-  );
+  const dayOfTheMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  const prevs = generateDays(prevMonthDays);
+  const monthDays = generateDays(dayOfTheMonth);
 
-  return [...leadingDays, ...monthDays];
+  const data = dayOfTheWeek === 0 ? [] : prevs.slice(-dayOfTheWeek);
+
+  const formattedData = createCalendarCells(data, "prev");
+  const currentMonthDays = createCalendarCells(monthDays, "current");
+
+  return [...formattedData, ...currentMonthDays];
+}
+
+function generateDays(count) {
+  return Array.from({ length: count }, (_, index) => index + 1);
+}
+
+function createCalendarCells(days, type) {
+  return days.map((day) => {
+    return {
+      day,
+      type,
+    };
+  });
 }
 
 function renderCalender() {
-  daysContainer.textContent = "";
+  daysContainer.textContent = ""; //clean up
 
   const days = getCalendarDays(currentYear, currentMonth);
-
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
   datePickerTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
   // initialize the canlender days
-  days.forEach((day) => {
+  days.forEach(({ day, type }) => {
     const dayCell = document.createElement("div");
     dayCell.className = "day-cell";
     if (day) {
       dayCell.textContent = day;
     }
+    if (type === "prev") {
+      dayCell.classList.add("other-month");
+    }
     if (isSelectedDay(day)) {
       dayCell.classList.add("selected");
     }
-    //   here we are attching even listener to all the cells, this does not seem correct, use event delegation
+    //here we are attching even listener to all the cells, this does not seem correct, use event delegation
     dayCell.addEventListener("click", function () {
       if (!day) return;
       selectedDate = new Date(currentYear, currentMonth, day);
@@ -134,7 +136,7 @@ function renderCalender() {
 }
 
 function goToNextMonth(state) {
-  if (state.month >11) {
+  if (state.month === 11) {
     return {
       month: 0,
       year: state.year + 1,
@@ -148,7 +150,7 @@ function goToNextMonth(state) {
 }
 
 function goToPrevMonth(state) {
-  if (state.month <0) {
+  if (state.month === 0) {
     return {
       month: 11,
       year: state.year - 1,
@@ -171,3 +173,20 @@ function isSelectedDay(day) {
     selectedDate.getFullYear() === currentYear
   );
 }
+
+// 1 implement previous days and nexy days as well
+
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
