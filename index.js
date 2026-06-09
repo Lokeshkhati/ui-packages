@@ -74,6 +74,7 @@ clearDateButton.addEventListener("click", function () {
   renderCalender();
 });
 
+const CALENDAR_GRID_SIZE = 42;
 // helper func
 function getCalendarDays(year, month) {
   const dayOfTheWeek = new Date(year, month, 1).getDay();
@@ -81,14 +82,17 @@ function getCalendarDays(year, month) {
   const dayOfTheMonth = new Date(year, month + 1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
   const prevs = generateDays(prevMonthDays);
-  const monthDays = generateDays(dayOfTheMonth);
 
   const data = dayOfTheWeek === 0 ? [] : prevs.slice(-dayOfTheWeek);
+  const lastMonthdays = createCalendarCells(data, "prev");
+  const currentMonthDays = createCalendarCells(generateDays(dayOfTheMonth), "current");
 
-  const formattedData = createCalendarCells(data, "prev");
-  const currentMonthDays = createCalendarCells(monthDays, "current");
+  const totalCells = lastMonthdays?.length + currentMonthDays?.length;
+  const remainingCells = CALENDAR_GRID_SIZE - totalCells;
 
-  return [...formattedData, ...currentMonthDays];
+  const nextMonthDays = createCalendarCells(generateDays(remainingCells), "next");
+
+  return [...lastMonthdays, ...currentMonthDays, ...nextMonthDays];
 }
 
 function generateDays(count) {
@@ -114,18 +118,21 @@ function renderCalender() {
   days.forEach(({ day, type }) => {
     const dayCell = document.createElement("div");
     dayCell.className = "day-cell";
+    if (type === "current") {
+      dayCell.classList.add("current-month-cell");
+    }
     if (day) {
       dayCell.textContent = day;
     }
-    if (type === "prev") {
+    if (type === "prev" || type === "next") {
       dayCell.classList.add("other-month");
     }
-    if (isSelectedDay(day)) {
+    if (isSelectedDay(day)&& type === "current") {
       dayCell.classList.add("selected");
     }
     //here we are attching even listener to all the cells, this does not seem correct, use event delegation
     dayCell.addEventListener("click", function () {
-      if (!day) return;
+      if (!day || type === "prev" || type === "next") return;
       selectedDate = new Date(currentYear, currentMonth, day);
       dateInput.value = selectedDate.toLocaleDateString();
       renderCalender();
