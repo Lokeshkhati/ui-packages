@@ -162,9 +162,6 @@ function isSelectedDay({ day, month, year }) {
   );
 }
 
-// 1. Event Delegation
-// 2. Rich CalendarCell Model
-// 3. render() orchestrator
 
 // function updateState(updater) {
 //   updater(state);
@@ -176,3 +173,11 @@ function isSelectedDay({ day, month, year }) {
 // updateState((state) => {
 //   state.currentYear += 1;
 // });
+
+
+// Todo
+
+// 1. extract selectDate()
+// 2. extract navigateToMonth()
+// 3. rename isSelectedDay -> isSelectedCell
+// 4. use dataset instead of setAttribute
