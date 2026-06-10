@@ -21,13 +21,9 @@ const elements = {
   clearDateButton: document.querySelector(".datepicker-clear-btn"),
 };
 
-function renderVisibility() {
-  elements.datePicker.style.display = state.isDatePickerOpen ? "block" : "none";
-}
-
 elements.dateInput.addEventListener("click", function () {
   state.isDatePickerOpen = !state.isDatePickerOpen;
-  renderVisibility();
+  render();
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -81,13 +77,18 @@ elements.clearDateButton.addEventListener("click", function () {
   renderCalender();
 });
 
-function renderCalender() {
-  elements.daysContainer.textContent = ""; //clean up
+function calenderCleanUp() {
+  elements.daysContainer.textContent = "";
+}
 
-  const days = getCalendarDays(state.currentYear, state.currentMonth);
+function renderHeader() {
   elements.datePickerTitle.textContent = `${monthNames[state.currentMonth]} ${
     state.currentYear
   }`;
+}
+
+function renderCells() {
+  const days = getCalendarDays(state.currentYear, state.currentMonth);
 
   // initialize the canlender days
   days.forEach(({ day, type }) => {
@@ -110,12 +111,28 @@ function renderCalender() {
       if (!day || type === CELL_TYPE.PREVIOUS || type === CELL_TYPE.NEXT)
         return;
       state.selectedDate = new Date(state.currentYear, state.currentMonth, day);
-      dateInput.value = state.selectedDate.toLocaleDateString();
+      elements.dateInput.value = state.selectedDate.toLocaleDateString();
       renderCalender();
     });
 
     elements.daysContainer.appendChild(dayCell);
   });
+}
+
+function renderVisibility() {
+  elements.datePicker.style.display = state.isDatePickerOpen ? "block" : "none";
+}
+
+function render() {
+  renderVisibility();
+  renderCalender();
+}
+
+function renderCalender() {
+  calenderCleanUp();
+
+  renderHeader();
+  renderCells();
 }
 
 function goToNextMonth(state) {
@@ -157,7 +174,6 @@ function isSelectedDay(day) {
   );
 }
 
-
 // 1. Event Delegation
 // 2. Rich CalendarCell Model
 // 3. render() orchestrator
@@ -165,7 +181,6 @@ function isSelectedDay(day) {
 // renderHeader();
 // renderDays();
 // renderVisibility();
-
 
 // function updateState(updater) {
 //   updater(state);
