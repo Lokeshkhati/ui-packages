@@ -106,18 +106,23 @@ function renderCells() {
     if (isSelectedDay(day) && type === CELL_TYPE.CURRENT) {
       dayCell.classList.add("selected");
     }
-    //here we are attching even listener to all the cells, this does not seem correct, use event delegation
-    dayCell.addEventListener("click", function () {
-      if (!day || type === CELL_TYPE.PREVIOUS || type === CELL_TYPE.NEXT)
-        return;
-      state.selectedDate = new Date(state.currentYear, state.currentMonth, day);
-      elements.dateInput.value = state.selectedDate.toLocaleDateString();
-      renderCalender();
-    });
-
+    dayCell.setAttribute("data-day", day);
+    dayCell.setAttribute("data-type", type);
     elements.daysContainer.appendChild(dayCell);
   });
 }
+
+elements.daysContainer.addEventListener("click", (event) => {
+  const dayCell = event.target.closest(".day-cell");
+  if (!dayCell) return;
+  const day = Number(dayCell.dataset.day);
+  const type = dayCell.dataset.type;
+
+  if (!day || type === CELL_TYPE.PREVIOUS || type === CELL_TYPE.NEXT) return;
+  state.selectedDate = new Date(state.currentYear, state.currentMonth, day);
+  elements.dateInput.value = state.selectedDate.toLocaleDateString();
+  renderCalender();
+});
 
 function renderVisibility() {
   elements.datePicker.style.display = state.isDatePickerOpen ? "block" : "none";
@@ -177,10 +182,6 @@ function isSelectedDay(day) {
 // 1. Event Delegation
 // 2. Rich CalendarCell Model
 // 3. render() orchestrator
-
-// renderHeader();
-// renderDays();
-// renderVisibility();
 
 // function updateState(updater) {
 //   updater(state);
