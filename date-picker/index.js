@@ -1,5 +1,9 @@
-import { CELL_TYPE, MONTH_INDEX, monthNames } from "./utils/constants.js";
-import { getCalendarDays } from "./utils/index.js";
+import { CELL_TYPE, monthNames } from "./utils/constants.js";
+import {
+  getCalendarDays,
+  getNextMonthInfo,
+  getPreviousMonthInfo,
+} from "./utils/index.js";
 
 const state = {
   isDatePickerOpen: false,
@@ -31,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 elements.nextMonthButton.addEventListener("click", function () {
-  const nextState = goToNextMonth({
+  const nextState = getNextMonthInfo({
     month: state.currentMonth,
     year: state.currentYear,
   });
@@ -47,7 +51,7 @@ elements.nextYearButton.addEventListener("click", function () {
 });
 
 elements.prevMonthButton.addEventListener("click", function () {
-  const nextState = goToPrevMonth({
+  const nextState = getPreviousMonthInfo({
     month: state.currentMonth,
     year: state.currentYear,
   });
@@ -91,7 +95,7 @@ function renderCells() {
   const days = getCalendarDays(state.currentYear, state.currentMonth);
 
   // initialize the canlender days
-  days.forEach(({ day, type }) => {
+  days.forEach(({ day, type, month, year }) => {
     const dayCell = document.createElement("div");
     dayCell.className = "day-cell";
     if (type === CELL_TYPE.CURRENT) {
@@ -103,11 +107,13 @@ function renderCells() {
     if (type === CELL_TYPE.PREVIOUS || type === CELL_TYPE.NEXT) {
       dayCell.classList.add("other-month");
     }
-    if (isSelectedDay(day) && type === CELL_TYPE.CURRENT) {
+    if (isSelectedDay({ day, month, year })) {
       dayCell.classList.add("selected");
     }
     dayCell.setAttribute("data-day", day);
     dayCell.setAttribute("data-type", type);
+    dayCell.setAttribute("data-month", month);
+    dayCell.setAttribute("data-year", year);
     elements.daysContainer.appendChild(dayCell);
   });
 }
@@ -116,10 +122,14 @@ elements.daysContainer.addEventListener("click", (event) => {
   const dayCell = event.target.closest(".day-cell");
   if (!dayCell) return;
   const day = Number(dayCell.dataset.day);
-  const type = dayCell.dataset.type;
+  const month = Number(dayCell.dataset.month);
+  const year = Number(dayCell.dataset.year);
 
-  if (!day || type === CELL_TYPE.PREVIOUS || type === CELL_TYPE.NEXT) return;
-  state.selectedDate = new Date(state.currentYear, state.currentMonth, day);
+  if (!day) return;
+  state.currentMonth = month;
+  state.currentYear = year;
+
+  state.selectedDate = new Date(year, month, day);
   elements.dateInput.value = state.selectedDate.toLocaleDateString();
   renderCalender();
 });
@@ -140,42 +150,15 @@ function renderCalender() {
   renderCells();
 }
 
-function goToNextMonth(state) {
-  if (state.month === MONTH_INDEX.DECEMBER) {
-    return {
-      month: MONTH_INDEX.JANUARY,
-      year: state.year + 1,
-    };
-  }
-
-  return {
-    month: state.month + 1,
-    year: state.year,
-  };
-}
-
-function goToPrevMonth(state) {
-  if (state.month === MONTH_INDEX.JANUARY) {
-    return {
-      month: MONTH_INDEX.DECEMBER,
-      year: state.year - 1,
-    };
-  }
-  return {
-    month: state.month - 1,
-    year: state.year,
-  };
-}
-
-function isSelectedDay(day) {
-  if (!state.selectedDate || !day) {
+function isSelectedDay({ day, month, year }) {
+  if (!state.selectedDate) {
     return false;
   }
 
   return (
     state.selectedDate.getDate() === day &&
-    state.selectedDate.getMonth() === state.currentMonth &&
-    state.selectedDate.getFullYear() === state.currentYear
+    state.selectedDate.getMonth() === month &&
+    state.selectedDate.getFullYear() === year
   );
 }
 
